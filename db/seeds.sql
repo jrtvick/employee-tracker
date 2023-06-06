@@ -23,7 +23,7 @@ VALUES
     ("Mort", "Stinkman", 1, NULL),
     ("Elizabeth", "Boop", 2, 1),
     ("Allan", "Yankovich", 3, 2),
-    ("William", "Gatez", 4, 3),
+    ("William", "Gaits", 4, 3),
     ("Steven", "Careers", 5, 4),
     ("Timothy", "Chef", 6, 5),
     ("Red", "Shrub", 7, 6);
