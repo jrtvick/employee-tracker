@@ -85,7 +85,6 @@ function addToDepartments() {
       },
     ])
     .then((response) => {
-      // { name: "MyDepartment"}
       db.addToDepartments(response)
         .then(() => {
           console.log(`${response.name} deparment added`);
@@ -96,12 +95,37 @@ function addToDepartments() {
 }
 
 function addToRoles() {
-  db.addToRoles()
-    .then(([data]) => {
-      console.table(data);
-      mainMenu();
-    })
-    .catch((err) => console.log(err));
+  db.viewAllDepartments().then(([deptsData]) => {
+    const deptsChoices = deptsData.map(({ id, name }) => ({ name, value: id }));
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          message: "What is the job title?",
+          name: "title",
+        },
+        {
+          type: "list",
+          message: "Which department does the job belong to?",
+          name: "department_id",
+          choices: deptsChoices,
+        },
+        {
+          type: "input",
+          message: "What is the salary for this position?",
+          name: "salary",
+        },
+      ])
+      .then((response) => {
+        console.log(response);
+        db.addToRoles(response)
+          .then(() => {
+            console.log(`${response.title} role added`);
+            mainMenu();
+          })
+          .catch((err) => console.log(err));
+      });
+  });
 }
 
 function addToEmployees() {
