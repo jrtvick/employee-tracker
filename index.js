@@ -18,14 +18,39 @@ inquirer
     }
   ])
   .then((answers) => {
-    console.log('log me');
+    switch (answers.action) {
+      case 'View all departments': 
+        viewAllDepartments();
+        break;
+      case 'View all roles':
+        viewAllRoles();
+        break;
+      case 'View all employees':
+        viewAllEmployees();
+        break;
+    }
   });
 
 function viewAllDepartments() {
   db.viewAllDepartments()
-    .then((data) => {
-      console.log("hello");
-      console.log(data);
+    .then(([data]) => {
+      console.table(data);
+    })
+    .catch((err) => console.log(err));
+};
+
+function viewAllRoles() {
+  db.viewAllRoles()
+    .then(([data]) => {
+      console.table(data);
+    })
+    .catch((err) => console.log(err));
+};
+
+function viewAllEmployees() {
+  db.viewAllEmployees()
+    .then(([data]) => {
+      console.table(data);
     })
     .catch((err) => console.log(err));
 };
