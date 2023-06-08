@@ -23,6 +23,9 @@ class Queries {
     addToEmployees(employee){
         return this.connection.promise().query("INSERT INTO employee SET ?", employee)
     }
+    updateEmployeeRole(role){
+        return this.connection.promise().query("INSERT INTO role SET ?", role)
+    }
 }
 
 module.exports = new Queries(db)

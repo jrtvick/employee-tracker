@@ -1,7 +1,19 @@
 const inquirer = require("inquirer");
-const db = require("./db");
+const db = require("./db/index");
+const mysql = require("mysql2");
 
 mainMenu();
+
+const hello = mysql.createConnection(
+  {
+    host: "localhost",
+    user: "root",
+    password: "3Gd5znfc!9",
+    database: "employees_db",
+  },
+
+  console.log(`Connected to the employees_db database.`)
+);
 
 function mainMenu() {
   inquirer
@@ -97,6 +109,7 @@ function addToDepartments() {
 function addToRoles() {
   db.viewAllDepartments().then(([deptsData]) => {
     const deptsChoices = deptsData.map(({ id, name }) => ({ name, value: id }));
+    console.log(deptsChoices);
     inquirer
       .prompt([
         {
@@ -129,10 +142,94 @@ function addToRoles() {
 }
 
 function addToEmployees() {
-  db.addToEmployees()
-    .then(([data]) => {
-      console.table(data);
-      mainMenu();
-    })
-    .catch((err) => console.log(err));
+  db.viewAllEmployees().then(([employeeData]) => {
+    const managerChoice = employeeData.map(({ id, name }) => ({
+      id,
+      name: first_name + " " + last_name,
+    }));
+    db.viewAllRoles().then(([employeeData]) => {
+      const roleChoice = employeeData.map(({ title, id }) => ({
+        id,
+        value: title,
+      }));
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            message: "What is the employees first name?",
+            name: "first_name",
+          },
+          {
+            type: "input",
+            message: "What is the employees last name?",
+            name: "last_name",
+          },
+          {
+            type: "list",
+            message: "What is the employees role?",
+            name: "role",
+            choices: roleChoice,
+          },
+          {
+            type: "list",
+            message: "Who is the employees manager?",
+            name: "manager",
+            choices: managerChoice,
+          },
+        ])
+        .then((response) => {
+          let role_id, manager_id;
+          for (let i = 0; i < roleChoice.length; i++) {
+            if (response.role == roleChoice[i].value) role_id = i + 1;
+          }
+          for (let i = 0; i < managerChoice.length; i++) {
+            if (response.manager == managerChoice[i].name) manager_id = i + 1;
+          }
+          hello.query(
+            `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${response.first_name}', '${response.last_name}', ${role_id}, ${manager_id})`,
+            (err, response) => {
+              if (err) console.log(err);
+              else console.log(viewAllEmployees());
+            }
+          );
+        });
+    });
+  });
 }
+
+// function updateEmployeeRole() {
+//   db.viewAllEmployees().then(([employeeData]) => {
+//     const employeeChoice = employeeData.map({ first_name, last_name, id })})};
+//     const roleChoice = employeeData.map(({ title, id }) => ({ id, value: title,}));
+//       inquirer
+//         .prompt([
+//           {
+//             type: "list",
+//             message: "Which employee is being updated?",
+//             name: "",
+//             choices: employeeChoice,
+//           },
+//           {
+//             type: "list",
+//             message: "Which role are they being assigned?",
+//             name: "role",
+//             choices: roleChoice,
+//           }
+
+//         ])
+//         .then((response) => {
+//           let role_id, manager_id;
+//           for (let i = 0; i < roleChoice.length; i++) {
+//             if (response.role == roleChoice[i].value) role_id = i + 1;
+//           }
+//           for (let i = 0; i < managerChoice.length; i++) {
+//             if (response.manager == managerChoice[i].name) manager_id = i + 1;
+//           }
+//           hello.query(
+//             `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${response.first_name}', '${response.last_name}', ${role_id}, ${manager_id})`,
+//             (err, response) => {
+//               if (err) console.log(err);
+//               else console.log(viewAllEmployees());
+//             }
+//           );
+//         });
