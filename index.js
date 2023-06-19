@@ -54,6 +54,9 @@ function mainMenu() {
         case "Add an employee":
           addToEmployees();
           break;
+        case "Update an employee role":
+          updateEmployeeRole();
+          break;
         case "Exit":
           process.exit();
       }
@@ -190,39 +193,52 @@ function addToEmployees() {
   });
 }
 
-// function updateEmployeeRole() {
-//   db.viewAllEmployees().then(([employeeData]) => {
-//     const employeeChoice = employeeData.map({ first_name, last_name, id })})};
-//     const roleChoice = employeeData.map(({ title, id }) => ({ id, value: title,}));
-//       inquirer
-//         .prompt([
-//           {
-//             type: "list",
-//             message: "Which employee is being updated?",
-//             name: "",
-//             choices: employeeChoice,
-//           },
-//           {
-//             type: "list",
-//             message: "Which role are they being assigned?",
-//             name: "role",
-//             choices: roleChoice,
-//           }
+function updateEmployeeRole() {
+  db.viewAllEmployees().then(([employeeData]) => {
+    const employeeChoice = employeeData.map(
+      ({ id, first_name, last_name }) => ({
+        value: id,
+        name: first_name + " " + last_name,
+      })
+    );
+    db.viewAllRoles().then(([roleData]) => {
+      const roleChoice = roleData.map(({ id, title }) => ({
+        value: id,
+        name: title,
+      }));
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            message: "Which employee is being updated?",
+            name: "employee_id",
+            choices: employeeChoice,
+          },
+          {
+            type: "list",
+            message: "Which role are they being assigned?",
+            name: "role_id",
+            choices: roleChoice,
+          },
+        ])
+        .then((response) => {
+          console.log(response);
+          db.updateEmployeeRole(response.employee_id, response.role_id)
+            .then(() => {
+              const updatedEmployee = employeeData.find(
+                (employee) => employee.id === response.employee_id
+              );
+              const updatedRole = roleData.find(
+                (role) => role.id === response.role_id
+              );
 
-//         ])
-//         .then((response) => {
-//           let role_id, manager_id;
-//           for (let i = 0; i < roleChoice.length; i++) {
-//             if (response.role == roleChoice[i].value) role_id = i + 1;
-//           }
-//           for (let i = 0; i < managerChoice.length; i++) {
-//             if (response.manager == managerChoice[i].name) manager_id = i + 1;
-//           }
-//           hello.query(
-//             `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${response.first_name}', '${response.last_name}', ${role_id}, ${manager_id})`,
-//             (err, response) => {
-//               if (err) console.log(err);
-//               else console.log(viewAllEmployees());
-//             }
-//           );
-//         });
+              console.log(
+                `${updatedEmployee.first_name} ${updatedEmployee.last_name}'s role was updated to: ${updatedRole.title}`
+              );
+              mainMenu();
+            })
+            .catch((err) => console.log(err));
+        });
+    });
+  });
+}
