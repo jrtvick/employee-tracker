@@ -143,14 +143,14 @@ function addToRoles() {
 
 function addToEmployees() {
   db.viewAllEmployees().then(([employeeData]) => {
-    const managerChoice = employeeData.map(({ id, name }) => ({
-      id,
+    const managerChoice = employeeData.map(({ id, first_name, last_name }) => ({
+      value: id,
       name: first_name + " " + last_name,
     }));
-    db.viewAllRoles().then(([employeeData]) => {
-      const roleChoice = employeeData.map(({ title, id }) => ({
-        id,
-        value: title,
+    db.viewAllRoles().then(([roleData]) => {
+      const roleChoice = roleData.map(({ id, title }) => ({
+        value: id,
+        name: title,
       }));
       inquirer
         .prompt([
@@ -167,31 +167,24 @@ function addToEmployees() {
           {
             type: "list",
             message: "What is the employees role?",
-            name: "role",
+            name: "role_id",
             choices: roleChoice,
           },
           {
             type: "list",
             message: "Who is the employees manager?",
-            name: "manager",
+            name: "manager_id",
             choices: managerChoice,
           },
         ])
         .then((response) => {
-          let role_id, manager_id;
-          for (let i = 0; i < roleChoice.length; i++) {
-            if (response.role == roleChoice[i].value) role_id = i + 1;
-          }
-          for (let i = 0; i < managerChoice.length; i++) {
-            if (response.manager == managerChoice[i].name) manager_id = i + 1;
-          }
-          hello.query(
-            `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${response.first_name}', '${response.last_name}', ${role_id}, ${manager_id})`,
-            (err, response) => {
-              if (err) console.log(err);
-              else console.log(viewAllEmployees());
-            }
-          );
+          console.log(response);
+          db.addToEmployees(response)
+            .then(() => {
+              console.log(`${response.first_name} employee added`);
+              mainMenu();
+            })
+            .catch((err) => console.log(err));
         });
     });
   });
