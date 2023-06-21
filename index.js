@@ -1,33 +1,25 @@
 const inquirer = require("inquirer");
 const db = require("./db/index");
-const mysql = require("mysql2");
 
-mainMenu();
-
-const hello = mysql.createConnection(
-  {
-    host: "localhost",
-    user: "root",
-    password: "3Gd5znfc!9",
-    database: "employees_db",
-  },
-
-  console.log(`Connected to the employees_db database.`)
-);
-
-function mainMenu() {
+function init() {
   console.log(`
   _____                    _                           
- | ____| _ __ ___   _ __  | |  ___   _   _   ___   ___ 
- |  _|  | '_ ' _ \\ | '_ \\ | | / _ \\ | | | | / _ \\ / _ \\
- | |___ | | | | | || |_) || || (_) || |_| ||  __/|  __/
- |_____||_| |_| |_|| .__/ |_| \\___/  \\__, | \\___| \\___|
+  | ____| _ __ ___   _ __  | |  ___   _   _   ___   ___ 
+  |  _|  | '_ ' _ \\ | '_ \\ | | / _ \\ | | | | / _ \\ / _ \\
+  | |___ | | | | | || |_) || || (_) || |_| ||  __/|  __/
+  |_____||_| |_| |_|| .__/ |_| \\___/  \\__, | \\___| \\___|
   _____            |_|    _          |___/             
- |_   _|_ __  __ _   ___ | | __ ___  _ __              
+  |_   _|_ __  __ _   ___ | | __ ___  _ __              
    | | | '__|/ _' | / __|| |/ // _ \\| '__|             
    | | | |  | (_| || (__ |   <|  __/| |                
    |_| |_|   \\__,_| \\___||_|\\_\\\\___||_|                
- `);
+  `);
+  mainMenu();
+}
+
+init();
+
+function mainMenu() {
 
   inquirer
     .prompt([
@@ -124,7 +116,10 @@ function addToDepartments() {
 
 function addToRoles() {
   db.viewAllDepartments().then(([deptsData]) => {
-    const deptsChoices = deptsData.map(({ id, name }) => ({ name, value: id }));
+      const deptsChoice = deptsData.map(({ Department_ID, Department_Name }) => ({
+        value: Department_ID,
+        name: Department_Name,
+      }));
     inquirer
       .prompt([
         {
@@ -136,7 +131,7 @@ function addToRoles() {
           type: "list",
           message: "Which department does the job belong to?",
           name: "department_id",
-          choices: deptsChoices,
+          choices: deptsChoice,
         },
         {
           type: "input",
@@ -148,7 +143,7 @@ function addToRoles() {
         console.log(response);
         db.addToRoles(response)
           .then(() => {
-            console.log(`${response.title} role added`);
+            console.log(`${response.title} role has been added!`);
             mainMenu();
           })
           .catch((err) => console.log(err));
@@ -158,14 +153,14 @@ function addToRoles() {
 
 function addToEmployees() {
   db.viewAllEmployees().then(([employeeData]) => {
-    const managerChoice = employeeData.map(({ id, first_name, last_name }) => ({
+    const managerChoice = employeeData.map(({ id, Manager }) => ({
       value: id,
-      name: first_name + " " + last_name,
+      name: Manager,
     }));
     db.viewAllRoles().then(([roleData]) => {
-      const roleChoice = roleData.map(({ id, title }) => ({
-        value: id,
-        name: title,
+      const roleChoice = roleData.map(({ Role_ID, Role }) => ({
+        value: Role_ID,
+        name: Role,
       }));
       inquirer
         .prompt([
@@ -196,7 +191,7 @@ function addToEmployees() {
           console.log(response);
           db.addToEmployees(response)
             .then(() => {
-              console.log(`${response.first_name} employee added`);
+              console.log(`${response.first_name} has been added to employees!`);
               mainMenu();
             })
             .catch((err) => console.log(err));
@@ -208,44 +203,44 @@ function addToEmployees() {
 function updateEmployeeRole() {
   db.viewAllEmployees().then(([employeeData]) => {
     const employeeChoice = employeeData.map(
-      ({ id, first_name, last_name }) => ({
-        value: id,
-        name: first_name + " " + last_name,
+      ({ Employee_ID, First_Name, Last_Name }) => ({
+        value: Employee_ID,
+        name: First_Name + " " + Last_Name,
       })
     );
     db.viewAllRoles().then(([roleData]) => {
-      const roleChoice = roleData.map(({ id, title }) => ({
-        value: id,
-        name: title,
+      const roleChoice = roleData.map(({ Role_ID, Role }) => ({
+        value: Role_ID,
+        name: Role,
       }));
       inquirer
         .prompt([
           {
             type: "list",
             message: "Which employee is being updated?",
-            name: "employee_id",
+            name: "Employee_ID",
             choices: employeeChoice,
           },
           {
             type: "list",
             message: "Which role are they being assigned?",
-            name: "role_id",
+            name: "Role_ID",
             choices: roleChoice,
           },
         ])
         .then((response) => {
-          console.log(response);
-          db.updateEmployeeRole(response.employee_id, response.role_id)
+          console.log("response",response);
+          db.updateEmployeeRole(response.Employee_ID, response.Role_ID)
             .then(() => {
               const updatedEmployee = employeeData.find(
-                (employee) => employee.id === response.employee_id
+                (employee) => employee.Employee_ID === response.Employee_ID
               );
               const updatedRole = roleData.find(
-                (role) => role.id === response.role_id
+                (role) => role.Role_ID === response.Role_ID
               );
 
               console.log(
-                `${updatedEmployee.first_name} ${updatedEmployee.last_name}'s role was updated to: ${updatedRole.title}`
+                `${updatedEmployee.First_Name} ${updatedEmployee.Last_Name}'s role was updated to: ${updatedRole.Role}`
               );
               mainMenu();
             })
