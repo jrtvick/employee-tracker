@@ -32,8 +32,6 @@ https://coding-boot-camp.github.io/full-stack/mysql/mysql-installation-guide
 
 ## Usage
 
-![Tyler Vick's Employee Tracker video](./assets/)
-
 The URL of the GitHub repository: https://github.com/jrtvick/employee-tracker.git
 
 <br>
