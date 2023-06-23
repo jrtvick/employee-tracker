@@ -153,8 +153,8 @@ function addToRoles() {
 
 function addToEmployees() {
   db.viewAllEmployees().then(([employeeData]) => {
-    const managerChoice = employeeData.map(({ id, Manager }) => ({
-      value: id,
+    const managerChoice = employeeData.map(({ Manager_ID, Manager }) => ({
+      value: Manager_ID,
       name: Manager,
     }));
     db.viewAllRoles().then(([roleData]) => {
